@@ -10,8 +10,12 @@ class QueryExpansion:
     def generate_response(query: str, to_expand_to_n: int) -> list[str]:
         query_expansion_template = QueryExpansionTemplate()
         prompt_template = query_expansion_template.create_template(to_expand_to_n)
-        model = ChatOpenAI(model=settings.OPENAI_MODEL_ID, temperature=0)
-
+        # 修改这里，使用Qwen模型
+        model = ChatOpenAI(
+            model=settings.QWEN_MODEL_ID,
+            api_key=settings.QWEN_API_KEY,
+            base_url="https://dashscope.aliyuncs.com/compatible-mode/v1"
+        )
         chain = GeneralChain().get_chain(
             llm=model, output_key="expanded_queries", template=prompt_template
         )

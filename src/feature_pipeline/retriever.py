@@ -14,11 +14,23 @@ from core.rag.retriever import VectorRetriever
 
 logger = get_logger(__name__)
 
+# 先 patch localhost 设置
 settings.patch_localhost()
 logger.warning(
-    "Patched settings to work with 'localhost' URLs. \
-    Remove the 'settings.patch_localhost()' call from above when deploying or running inside Docker."
+    "Patched settings to work with 'localhost' URLs. \n"
+    "Remove the 'settings.patch_localhost()' call from above when deploying or running inside Docker."
 )
+
+# 重置 MongoDB 连接
+from core.db.mongo import MongoDatabaseConnector
+MongoDatabaseConnector.reset_connection()
+
+# 然后再配置 Opik
+try:
+    from core.opik_utils import configure_opik
+    configure_opik()
+except Exception as e:
+    logger.warning(f"Could not configure Opik: {str(e)}")
 
 if __name__ == "__main__":
     query = """

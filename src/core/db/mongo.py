@@ -15,6 +15,12 @@ class MongoDatabaseConnector:
     def __new__(cls, *args, **kwargs):
         if cls._instance is None:
             try:
+                # 添加directConnection=True参数
+                # cls._instance = MongoClient(settings.MONGO_DATABASE_HOST, directConnection=True)
+                # logger.info(
+                #     f"Connection to database with uri: {settings.MONGO_DATABASE_HOST} successful"
+                # )
+                # 移除directConnection=True参数
                 cls._instance = MongoClient(settings.MONGO_DATABASE_HOST)
                 logger.info(
                     f"Connection to database with uri: {settings.MONGO_DATABASE_HOST} successful"
@@ -25,6 +31,15 @@ class MongoDatabaseConnector:
                 raise
 
         return cls._instance
+
+    @classmethod
+    def reset_connection(cls):
+        """Reset the database connection with updated settings."""
+        if cls._instance:
+            cls._instance.close()
+            logger.info("Database connection closed.")
+        cls._instance = None
+        return cls()
 
     def get_database(self):
         assert self._instance, "Database connection not initialized"
@@ -37,4 +52,5 @@ class MongoDatabaseConnector:
             logger.info("Connected to database has been closed.")
 
 
-connection = MongoDatabaseConnector()
+# 移除模块级别的实例创建
+# connection = MongoDatabaseConnector()

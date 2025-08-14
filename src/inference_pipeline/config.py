@@ -18,6 +18,10 @@ class Settings(BaseSettings):
     OPENAI_MODEL_ID: str = "gpt-4o-mini"
     OPENAI_API_KEY: str | None = None
 
+    # Qwen config
+    QWEN_MODEL_ID: str = "qwen-plus"
+    QWEN_API_KEY: str | None = None
+
     # QdrantDB config
     QDRANT_DATABASE_HOST: str = "localhost"  # Or 'qdrant' if running inside Docker
     QDRANT_DATABASE_PORT: int = 6333

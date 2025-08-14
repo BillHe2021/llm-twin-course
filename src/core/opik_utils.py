@@ -20,6 +20,13 @@ except:
 
 
 def configure_opik() -> None:
+    logger.info(f"COMET_API_KEY loaded: {settings.COMET_API_KEY is not None}")
+    logger.info(f"COMET_PROJECT loaded: {settings.COMET_PROJECT}")
+    logger.info(f"COMET_WORKSPACE loaded: {settings.COMET_WORKSPACE}")
+
+    # 添加配置状态标志
+    opik_configured = False
+
     if settings.COMET_API_KEY and settings.COMET_PROJECT:
         if settings.COMET_WORKSPACE:
             default_workspace = settings.COMET_WORKSPACE
@@ -27,25 +34,35 @@ def configure_opik() -> None:
             try:
                 client = OpikConfigurator(api_key=settings.COMET_API_KEY)
                 default_workspace = client._get_default_workspace()
-            except Exception:
+            except Exception as e:
                 logger.warning(
-                    "Default workspace not found. Setting workspace to None and enabling interactive mode."
+                    f"Default workspace not found: {str(e)}. Setting workspace to None and enabling interactive mode."
                 )
                 default_workspace = None
 
         os.environ["OPIK_PROJECT_NAME"] = settings.COMET_PROJECT
 
-        opik.configure(
-            api_key=settings.COMET_API_KEY,
-            workspace=default_workspace,
-            use_local=False,
-            force=True,
-        )
-        logger.info("Opik configured successfully.")
+        try:
+            opik.configure(
+                api_key=settings.COMET_API_KEY,
+                workspace=default_workspace,
+                use_local=False,
+                force=True,
+            )
+            logger.info("Opik configured successfully.")
+            opik_configured = True
+        except Exception as e:
+            logger.error(f"Failed to configure Opik: {str(e)}")
+            # 添加网络超时特定处理
+            if "timed out" in str(e).lower():
+                logger.error("Network timeout occurred. Check your internet connection and try again.")
     else:
         logger.warning(
             "COMET_API_KEY and COMET_PROJECT are not set. Set them to enable prompt monitoring with Opik (powered by Comet ML)."
         )
+
+    # 存储配置状态供其他函数检查
+    os.environ["OPIK_CONFIGURED"] = str(opik_configured)
 
 
 def create_dataset_from_artifacts(

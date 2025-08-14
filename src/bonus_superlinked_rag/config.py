@@ -21,5 +21,9 @@ class Settings(BaseSettings):
     OPENAI_MODEL_ID: str = "gpt-4o-mini"
     OPENAI_API_KEY: str | None = None
 
+    # Qwen config
+    QWEN_MODEL_ID: str = "qwen-plus"
+    QWEN_API_KEY: str | None = None
+
 
 settings = Settings()

@@ -8,7 +8,13 @@ class SelfQuery:
     @staticmethod
     def generate_response(query: str) -> str | None:
         prompt = SelfQueryTemplate().create_template()
-        model = ChatOpenAI(model=settings.OPENAI_MODEL_ID, temperature=0)
+        # 修改这里，使用Qwen模型
+        model = ChatOpenAI(
+            model=settings.QWEN_MODEL_ID,
+            api_key=settings.QWEN_API_KEY,
+            base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
+            temperature=0
+        )
 
         chain = GeneralChain().get_chain(
             llm=model, output_key="metadata_filter_value", template=prompt

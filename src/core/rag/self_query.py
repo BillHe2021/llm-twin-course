@@ -18,9 +18,11 @@ class SelfQuery:
     @opik.track(name="SelQuery.generate_response")
     def generate_response(query: str) -> str | None:
         prompt = SelfQueryTemplate().create_template()
+        # 修改这里，使用Qwen模型
         model = ChatOpenAI(
-            model=settings.OPENAI_MODEL_ID,
-            api_key=settings.OPENAI_API_KEY,
+            model=settings.QWEN_MODEL_ID,
+            api_key=settings.QWEN_API_KEY,
+            base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
             temperature=0,
         )
         chain = prompt | model

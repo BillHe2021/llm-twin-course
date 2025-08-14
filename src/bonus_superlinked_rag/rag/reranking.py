@@ -13,7 +13,12 @@ class Reranker:
         reranking_template = RerankingTemplate()
         prompt_template = reranking_template.create_template(keep_top_k=keep_top_k)
 
-        model = ChatOpenAI(model=settings.OPENAI_MODEL_ID)
+        # 修改这里，使用Qwen模型
+        model = ChatOpenAI(
+            model=settings.QWEN_MODEL_ID,
+            api_key=settings.QWEN_API_KEY,
+            base_url="https://dashscope.aliyuncs.com/compatible-mode/v1"
+        )
         chain = GeneralChain().get_chain(
             llm=model, output_key="rerank", template=prompt_template
         )

@@ -5,10 +5,16 @@ from pydantic import UUID4, BaseModel, ConfigDict, Field
 from pymongo import errors
 
 import core.logger_utils as logger_utils
-from core.db.mongo import connection
+from core.db.mongo import MongoDatabaseConnector
 from core.errors import ImproperlyConfigured
 
-_database = connection.get_database("twin")
+# 移除这行代码
+# _database = connection.get_database("twin")
+
+def get_database():
+    """动态获取数据库连接"""
+    connection = MongoDatabaseConnector()
+    return connection.get_database("twin")
 
 logger = logger_utils.get_logger(__name__)
 
@@ -42,7 +48,8 @@ class BaseDocument(BaseModel):
         return parsed
 
     def save(self, **kwargs):
-        collection = _database[self._get_collection_name()]
+        # 修改为动态获取数据库
+        collection = get_database()[self._get_collection_name()]
 
         try:
             result = collection.insert_one(self.to_mongo(**kwargs))
@@ -54,7 +61,7 @@ class BaseDocument(BaseModel):
 
     @classmethod
     def get_or_create(cls, **filter_options) -> Optional[str]:
-        collection = _database[cls._get_collection_name()]
+        collection = get_database()[cls._get_collection_name()]
         try:
             instance = collection.find_one(filter_options)
             if instance:
@@ -69,7 +76,7 @@ class BaseDocument(BaseModel):
 
     @classmethod
     def find(cls, **filter_options):
-        collection = _database[cls._get_collection_name()]
+        collection = get_database()[cls._get_collection_name()]
         try:
             instance = collection.find_one(filter_options)
             if instance:
@@ -83,7 +90,7 @@ class BaseDocument(BaseModel):
 
     @classmethod
     def bulk_insert(cls, documents: List, **kwargs) -> Optional[List[str]]:
-        collection = _database[cls._get_collection_name()]
+        collection = get_database()[cls._get_collection_name()]
         try:
             result = collection.insert_many(
                 [doc.to_mongo(**kwargs) for doc in documents]
@@ -139,3 +146,12 @@ class ArticleDocument(BaseDocument):
 
     class Settings:
         name = "articles"
+
+
+class Document:
+    @classmethod
+    def get_collection(cls):
+        # 动态获取连接
+        connection = MongoDatabaseConnector()
+        db = connection.get_database()
+        return db[cls.__collection_name__]
